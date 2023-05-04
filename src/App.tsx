@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import reactLogo from "./assets/react.svg";
 import liranImg from "./assets/liran.png";
 import liranAudio from "./assets/liran.mp3";
@@ -27,6 +27,34 @@ const FAMILY_AUDIO_MAP: FamilyAudioMap = {
 };
 
 function App() {
+  const [multiplier, setMultiplier] = useState(1);
+
+  useEffect(() => {
+    // Obtain access to user's microphone
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      const audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+
+      // Connect microphone data to analyser node
+      source.connect(analyser);
+
+      // Process microphone data every 100ms
+      // setInterval(() => {
+      //   const bufferLength = analyser.frequencyBinCount;
+      //   const dataArray = new Uint8Array(bufferLength);
+      //   analyser.getByteFrequencyData(dataArray);
+
+      //   // Calculate average volume of microphone data
+      //   const sum = dataArray.reduce((a, b) => a + b, 0);
+      //   const avg = sum / bufferLength;
+
+      //   // Set multiplier based on average volume
+      //   setMultiplier(avg / 128 + 1);
+      // }, 2000);
+    });
+  }, []);
+
   const handleClick = (p: string) => {
     const audio = FAMILY_AUDIO_MAP[p].audio;
     audio.play();
@@ -34,15 +62,19 @@ function App() {
 
   return (
     <div className="App">
-      <h1 style={{ textAlign: "center" }}>ה מ ש פ ח ה . ש ל י </h1>
       <div className="wrapper">
-        {Object.keys(FAMILY_AUDIO_MAP).map((p) => (
-          <div className="card">
-            <button onClick={() => handleClick(p)}>
-              <img src={FAMILY_AUDIO_MAP[p].image} className="card-image" />
-            </button>
-          </div>
-        ))}
+        {Object.keys(FAMILY_AUDIO_MAP).map((p, index) => {
+          let randomNumber = Math.floor(Math.random() * 4) + 1;
+          const style =
+            randomNumber === index ? { transform: `scale(${multiplier})` } : {};
+          return (
+            <div className="card" style={style}>
+              <button onClick={() => handleClick(p)}>
+                <img src={FAMILY_AUDIO_MAP[p].image} className="card-image" />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
